@@ -62,6 +62,17 @@ where
         &self.settings
     }
 
+    /// Olvida un dispositivo guardado y elimina sus ajustes específicos.
+    pub fn remove_device(&mut self, device_id: &DeviceId) -> Result<(), AppError> {
+        self.settings
+            .devices
+            .retain(|device| &device.id != device_id);
+        self.settings.device_overrides.remove(device_id);
+        self.repository.save(&self.settings)?;
+        self.devices.retain(|device| &device.id != device_id);
+        Ok(())
+    }
+
     /// Inicia ADB, actualiza la lista de dispositivos y ajusta el estado resultante.
     pub fn refresh(&mut self) -> Result<&[Device], AppError> {
         self.state = AppState::LoadingDevices;

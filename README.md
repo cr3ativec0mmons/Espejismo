@@ -1,6 +1,8 @@
 # Espejismo
 
-Espejismo será una interfaz de escritorio para ADB y scrcpy, escrita en Rust con GTK4 y libadwaita. El núcleo del proyecto contiene el modelo de dispositivos, estado de aplicación, persistencia JSON versionada, cliente ADB seguro y launcher de scrcpy; la interfaz se incorporará sobre estos contratos.
+Espejismo es una interfaz experimental de escritorio para ADB y scrcpy, escrita en Rust con GTK4 y libadwaita. El núcleo contiene el modelo de dispositivos, estado de aplicación, persistencia JSON versionada, cliente ADB seguro y launcher de scrcpy.
+
+La primera superficie GTK ya incluye una ventana principal siguiendo la jerarquía de libadwaita, lista de dispositivos ADB, estados de diagnóstico, acción de actualización, flujo de emparejamiento Wi-Fi y lanzamiento de scrcpy mediante `Observar`. La opción `--verbose` muestra en la terminal las operaciones ADB, ocultando el código de pairing.
 
 ## Desarrollo
 
@@ -23,6 +25,8 @@ La feature `gui` habilita el binario GTK:
 ```text
 cargo run --features gui
 ```
+
+Para probar la interfaz experimental se necesitan además una sesión gráfica Wayland o X11. El diálogo de emparejamiento no persiste el código introducido.
 
 ADB, Platform-Tools, scrcpy y las reglas udev para Android son dependencias externas del paquete nativo. La aplicación no persistirá códigos de pairing ni ejecutará comandos mediante un shell.
 

@@ -39,6 +39,7 @@ pub trait AdbRunner {
 #[derive(Debug, Clone)]
 pub struct CommandAdbRunner {
     executable: PathBuf,
+    verbose: bool,
 }
 
 impl CommandAdbRunner {
@@ -46,7 +47,14 @@ impl CommandAdbRunner {
     pub fn from_path(path: impl Into<PathBuf>) -> Self {
         Self {
             executable: path.into(),
+            verbose: false,
         }
+    }
+
+    /// Activa el registro de comandos y salidas para uso desde terminal.
+    pub fn with_verbose(mut self, verbose: bool) -> Self {
+        self.verbose = verbose;
+        self
     }
 
     /// Crea un ejecutor que busca `adb` en el entorno del proceso.
@@ -58,11 +66,47 @@ impl CommandAdbRunner {
 impl AdbRunner for CommandAdbRunner {
     /// Ejecuta el binario configurado sin pasar por un shell.
     fn run(&self, arguments: &[OsString]) -> Result<AdbOutput, RunnerError> {
-        Command::new(&self.executable)
+        if self.verbose {
+            let displayed = arguments
+                .iter()
+                .enumerate()
+                .map(|(index, argument)| {
+                    if arguments.first().and_then(|value| value.to_str()) == Some("pair")
+                        && index == arguments.len().saturating_sub(1)
+                    {
+                        "<pairing-code>".to_owned()
+                    } else {
+                        argument.to_string_lossy().into_owned()
+                    }
+                })
+                .collect::<Vec<_>>();
+            eprintln!(
+                "[adb] {} {}",
+                self.executable.display(),
+                displayed.join(" ")
+            );
+        }
+        let output = Command::new(&self.executable)
             .args(arguments)
             .output()
             .map(AdbOutput::from)
-            .map_err(RunnerError::Start)
+            .map_err(RunnerError::Start)?;
+        if self.verbose {
+            eprintln!("[adb] exit={:?}", output.status_code);
+            if !output.stdout.is_empty() {
+                eprintln!(
+                    "[adb] stdout: {}",
+                    String::from_utf8_lossy(&output.stdout).trim()
+                );
+            }
+            if !output.stderr.is_empty() {
+                eprintln!(
+                    "[adb] stderr: {}",
+                    String::from_utf8_lossy(&output.stderr).trim()
+                );
+            }
+        }
+        Ok(output)
     }
 }
 
