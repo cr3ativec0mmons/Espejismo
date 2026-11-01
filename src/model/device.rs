@@ -6,17 +6,20 @@ use std::fmt;
 pub struct DeviceId(String);
 
 impl DeviceId {
+    /// Crea un identificador de dispositivo a partir de un serial no vacío.
     pub fn new(serial: impl Into<String>) -> Option<Self> {
         let serial = serial.into();
         (!serial.trim().is_empty()).then_some(Self(serial))
     }
 
+    /// Devuelve el serial almacenado sin realizar una copia.
     pub fn as_str(&self) -> &str {
         &self.0
     }
 }
 
 impl fmt::Display for DeviceId {
+    /// Escribe el serial del dispositivo en el formateador proporcionado.
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str(self.as_str())
     }
@@ -48,6 +51,7 @@ pub struct Device {
 }
 
 impl Device {
+    /// Indica si ADB considera que el dispositivo está listo para usarse.
     pub fn is_usable(&self) -> bool {
         self.status == DeviceStatus::Device
     }
@@ -58,6 +62,7 @@ mod tests {
     use super::*;
 
     #[test]
+    /// Comprueba que los seriales vacíos se rechazan.
     fn rejects_empty_device_ids() {
         assert!(DeviceId::new("  ").is_none());
     }

@@ -19,6 +19,7 @@ pub struct ScrcpyOptions {
 impl TryFrom<&ScrcpySettings> for ScrcpyOptions {
     type Error = ScrcpyError;
 
+    /// Valida las opciones persistidas antes de convertirlas a argumentos de scrcpy.
     fn try_from(settings: &ScrcpySettings) -> Result<Self, Self::Error> {
         let codec = settings.codec.as_deref().map(validate_codec).transpose()?;
         let bitrate = settings
@@ -53,6 +54,7 @@ pub struct ScrcpyLauncher {
 }
 
 impl ScrcpyLauncher {
+    /// Crea un lanzador que utilizará el ejecutable indicado.
     pub fn from_path(path: impl Into<PathBuf>) -> Self {
         Self {
             executable: path.into(),
@@ -60,10 +62,12 @@ impl ScrcpyLauncher {
         }
     }
 
+    /// Crea un lanzador que busca `scrcpy` en el entorno del proceso.
     pub fn from_path_environment() -> Self {
         Self::from_path("scrcpy")
     }
 
+    /// Construye los argumentos de scrcpy para un dispositivo y sus opciones.
     pub fn arguments(device_id: &DeviceId, options: &ScrcpyOptions) -> Vec<OsString> {
         let mut arguments = vec!["--serial".into(), device_id.as_str().into()];
         if let Some(codec) = &options.codec {
@@ -78,6 +82,7 @@ impl ScrcpyLauncher {
         arguments
     }
 
+    /// Inicia scrcpy e impide sesiones simultáneas para el mismo dispositivo.
     pub fn launch(
         &self,
         device_id: &DeviceId,
@@ -99,6 +104,7 @@ impl ScrcpyLauncher {
         }
     }
 
+    /// Libera el registro de sesión del dispositivo indicado.
     pub fn release(&self, device_id: &DeviceId) {
         self.sessions
             .lock()
@@ -107,6 +113,7 @@ impl ScrcpyLauncher {
     }
 }
 
+/// Valida que el codec solicitado sea compatible con las opciones admitidas.
 fn validate_codec(codec: &str) -> Result<String, ScrcpyError> {
     match codec {
         "h264" | "h265" | "av1" => Ok(codec.to_owned()),
@@ -114,6 +121,7 @@ fn validate_codec(codec: &str) -> Result<String, ScrcpyError> {
     }
 }
 
+/// Valida el formato y la longitud del bitrate solicitado.
 fn validate_bitrate(bitrate: &str) -> Result<String, ScrcpyError> {
     let valid = !bitrate.is_empty()
         && bitrate.len() <= 16
@@ -130,6 +138,7 @@ mod tests {
     use super::*;
 
     #[test]
+    /// Verifica la construcción de argumentos opcionales sin desactivar el control.
     fn builds_serial_and_optional_arguments_without_control_override_by_default() {
         let device = DeviceId::new("usb-serial").expect("device id");
         let options = ScrcpyOptions {
@@ -154,6 +163,7 @@ mod tests {
     }
 
     #[test]
+    /// Verifica que las opciones incompatibles se rechazan antes del lanzamiento.
     fn validates_options_before_launch() {
         let settings = ScrcpySettings {
             codec: Some("vp9".to_owned()),

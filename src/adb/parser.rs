@@ -12,6 +12,7 @@ pub enum AdbParseError {
 
 pub type AdbDevice = Device;
 
+/// Analiza la salida de `adb devices -l` y construye los dispositivos observados.
 pub fn parse_devices(output: &str) -> Result<Vec<AdbDevice>, AdbParseError> {
     output
         .lines()
@@ -20,6 +21,7 @@ pub fn parse_devices(output: &str) -> Result<Vec<AdbDevice>, AdbParseError> {
         .collect()
 }
 
+/// Analiza una línea de dispositivo, incluido su estado y sus metadatos.
 fn parse_device_line(line: &str) -> Result<AdbDevice, AdbParseError> {
     let fields = line.split_whitespace().collect::<Vec<_>>();
     let serial = fields
@@ -69,6 +71,7 @@ mod tests {
     use super::*;
 
     #[test]
+    /// Verifica el análisis de dispositivos y sus metadatos conocidos.
     fn parses_devices_and_metadata() {
         let devices = parse_devices(
             "List of devices attached\nusb-serial\tdevice product:foo model:Pixel_8\n192.0.2.1:5555\tdevice model:Tablet\n",
@@ -81,6 +84,7 @@ mod tests {
     }
 
     #[test]
+    /// Verifica que se conservan los estados de diagnóstico de ADB.
     fn preserves_diagnostic_states() {
         let devices = parse_devices(
             "List of devices attached\na\toffline\nb\tunauthorized\nc\tno permissions\n",

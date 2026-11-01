@@ -31,11 +31,13 @@ pub struct ScrcpySettings {
     pub control_enabled: bool,
 }
 
+/// Devuelve el valor predeterminado para habilitar el control de scrcpy.
 fn default_control_enabled() -> bool {
     true
 }
 
 impl Default for ScrcpySettings {
+    /// Construye las opciones de scrcpy recomendadas para una instalación nueva.
     fn default() -> Self {
         Self {
             codec: None,
@@ -66,6 +68,7 @@ pub struct SavedDevice {
 }
 
 impl Default for Settings {
+    /// Construye la configuración inicial de la aplicación.
     fn default() -> Self {
         Self {
             version: 1,
@@ -82,11 +85,13 @@ mod tests {
     use super::*;
 
     #[test]
+    /// Verifica que el control de scrcpy permanece habilitado por defecto.
     fn defaults_keep_control_enabled() {
         assert!(Settings::default().scrcpy.control_enabled);
     }
 
     #[test]
+    /// Verifica que los campos desconocidos no impiden cargar la configuración.
     fn unknown_fields_are_ignored() {
         let settings: Settings = serde_json::from_str(
             r#"{"version":1,"theme":"dark","scrcpy":{"decoder":"auto","control_enabled":true,"future":42},"future":true}"#,
@@ -96,6 +101,7 @@ mod tests {
     }
 
     #[test]
+    /// Verifica que los ajustes antiguos reciben colecciones vacías por defecto.
     fn older_settings_receive_empty_device_collections() {
         let settings: Settings = serde_json::from_str(
             r#"{"version":1,"theme":"system","scrcpy":{"decoder":"auto","control_enabled":true}}"#,

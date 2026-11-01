@@ -30,6 +30,7 @@ impl<R> AppController<R>
 where
     R: AdbRunner,
 {
+    /// Carga la configuración y crea el controlador en estado de carga.
     pub fn new(
         repository: ConfigRepository,
         adb: AdbClient<R>,
@@ -46,18 +47,22 @@ where
         })
     }
 
+    /// Devuelve el estado actual de la aplicación.
     pub fn state(&self) -> AppState {
         self.state
     }
 
+    /// Devuelve la lista de dispositivos observados sin copiarla.
     pub fn devices(&self) -> &[Device] {
         &self.devices
     }
 
+    /// Devuelve la configuración cargada sin copiarla.
     pub fn settings(&self) -> &Settings {
         &self.settings
     }
 
+    /// Inicia ADB, actualiza la lista de dispositivos y ajusta el estado resultante.
     pub fn refresh(&mut self) -> Result<&[Device], AppError> {
         self.state = AppState::LoadingDevices;
         let result = self.adb.start_server().and_then(|()| self.adb.devices());
@@ -78,6 +83,7 @@ where
         }
     }
 
+    /// Empareja, conecta y persiste un dispositivo inalámbrico válido.
     pub fn pair_and_connect(
         &mut self,
         pairing_endpoint: &Endpoint,
@@ -101,6 +107,7 @@ where
         Ok(device)
     }
 
+    /// Lanza scrcpy con el override del dispositivo o la configuración global.
     pub fn launch_scrcpy(&mut self, device_id: &DeviceId) -> Result<std::process::Child, AppError> {
         let device = self
             .devices
@@ -119,6 +126,7 @@ where
         Ok(child)
     }
 
+    /// Guarda o actualiza un dispositivo conectado en la configuración.
     fn save_device(&mut self, device: &Device) -> Result<(), AppError> {
         let saved = SavedDevice {
             id: device.id.clone(),

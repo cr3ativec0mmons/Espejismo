@@ -21,6 +21,7 @@ pub enum VersionError {
     InvalidOutput,
 }
 
+/// Detecta la versión de scrcpy ejecutando el binario con `--version`.
 pub fn detect_version(path: impl AsRef<Path>) -> Result<ScrcpyVersion, VersionError> {
     let output = Command::new(path.as_ref())
         .arg("--version")
@@ -37,6 +38,7 @@ pub fn detect_version(path: impl AsRef<Path>) -> Result<ScrcpyVersion, VersionEr
     }
 }
 
+/// Extrae una versión semántica de la salida de scrcpy.
 pub fn parse_version(output: &str) -> Result<ScrcpyVersion, VersionError> {
     output
         .split_whitespace()
@@ -60,6 +62,7 @@ mod tests {
     use super::*;
 
     #[test]
+    /// Verifica el análisis de una salida normal de versión de scrcpy.
     fn parses_release_output() {
         assert_eq!(
             parse_version("scrcpy 3.3.1 <https://github.com/Genymobile/scrcpy>").expect("version"),
@@ -72,6 +75,7 @@ mod tests {
     }
 
     #[test]
+    /// Verifica que una salida sin versión se rechaza.
     fn rejects_output_without_version() {
         assert!(matches!(
             parse_version("scrcpy unavailable"),

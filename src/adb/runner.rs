@@ -21,6 +21,7 @@ pub struct AdbOutput {
 }
 
 impl From<Output> for AdbOutput {
+    /// Convierte la salida de un proceso en la representación usada por ADB.
     fn from(output: Output) -> Self {
         Self {
             stdout: output.stdout,
@@ -31,6 +32,7 @@ impl From<Output> for AdbOutput {
 }
 
 pub trait AdbRunner {
+    /// Ejecuta ADB con argumentos separados y devuelve su salida capturada.
     fn run(&self, arguments: &[OsString]) -> Result<AdbOutput, RunnerError>;
 }
 
@@ -40,18 +42,21 @@ pub struct CommandAdbRunner {
 }
 
 impl CommandAdbRunner {
+    /// Crea un ejecutor que invoca el binario ubicado en la ruta indicada.
     pub fn from_path(path: impl Into<PathBuf>) -> Self {
         Self {
             executable: path.into(),
         }
     }
 
+    /// Crea un ejecutor que busca `adb` en el entorno del proceso.
     pub fn from_path_environment() -> Self {
         Self::from_path("adb")
     }
 }
 
 impl AdbRunner for CommandAdbRunner {
+    /// Ejecuta el binario configurado sin pasar por un shell.
     fn run(&self, arguments: &[OsString]) -> Result<AdbOutput, RunnerError> {
         Command::new(&self.executable)
             .args(arguments)
@@ -66,6 +71,7 @@ mod tests {
     use super::*;
 
     #[test]
+    /// Verifica que un ejecutable inexistente produce un error de inicio.
     fn reports_missing_executable_without_shelling_out() {
         let runner = CommandAdbRunner::from_path("/definitely/missing/adb");
         let result = runner.run(&[OsString::from("devices")]);

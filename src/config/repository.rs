@@ -27,20 +27,24 @@ pub struct ConfigRepository {
 }
 
 impl ConfigRepository {
+    /// Descubre la ruta de configuración del usuario mediante las rutas del sistema.
     pub fn discover() -> Result<Self, ConfigError> {
         let dirs = ProjectDirs::from("com", "Espejismo", "Espejismo")
             .ok_or(ConfigError::DirectoryUnavailable)?;
         Ok(Self::at(dirs.config_dir().join("config.json")))
     }
 
+    /// Crea un repositorio que utiliza la ruta indicada.
     pub fn at(path: impl Into<PathBuf>) -> Self {
         Self { path: path.into() }
     }
 
+    /// Devuelve la ruta del archivo de configuración.
     pub fn path(&self) -> &Path {
         &self.path
     }
 
+    /// Carga la configuración o devuelve los valores predeterminados si no existe.
     pub fn load(&self) -> Result<Settings, ConfigError> {
         match fs::read_to_string(&self.path) {
             Ok(contents) => serde_json::from_str(&contents).map_err(ConfigError::Parse),
@@ -49,6 +53,7 @@ impl ConfigRepository {
         }
     }
 
+    /// Carga la configuración y devuelve valores predeterminados junto con el error si falla.
     pub fn load_or_default(&self) -> (Settings, Option<ConfigError>) {
         match self.load() {
             Ok(settings) => (settings, None),
@@ -56,6 +61,7 @@ impl ConfigRepository {
         }
     }
 
+    /// Serializa y guarda la configuración mediante un reemplazo atómico.
     pub fn save(&self, settings: &Settings) -> Result<(), ConfigError> {
         let directory = self
             .path
@@ -76,6 +82,7 @@ mod tests {
     use super::*;
 
     #[test]
+    /// Comprueba que un archivo inexistente produce la configuración predeterminada.
     fn missing_file_returns_defaults() {
         let path =
             std::env::temp_dir().join(format!("espejismo-missing-{}.json", std::process::id()));
@@ -87,6 +94,7 @@ mod tests {
     }
 
     #[test]
+    /// Comprueba que guardar y cargar conserva la configuración.
     fn save_and_load_round_trip() {
         let directory = tempfile::tempdir().expect("temporary directory");
         let repository = ConfigRepository::at(directory.path().join("nested/config.json"));
@@ -96,6 +104,7 @@ mod tests {
     }
 
     #[test]
+    /// Comprueba que una configuración corrupta puede sustituirse por valores predeterminados.
     fn corrupt_file_can_fall_back_to_defaults() {
         let directory = tempfile::tempdir().expect("temporary directory");
         let path = directory.path().join("config.json");
