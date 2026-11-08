@@ -26,13 +26,13 @@ modules:
       - x86_64
     buildsystem: simple
     build-commands:
-      - install -Dm755 platform-tools/adb /app/bin/adb
-      - install -Dm755 platform-tools/fastboot /app/bin/fastboot
+      - install -Dm755 adb /app/bin/adb
+      - install -Dm755 fastboot /app/bin/fastboot
     sources:
       - type: archive
         url: https://dl.google.com/android/repository/platform-tools_r37.0.2-linux.zip
         sha256: dfc80a84a6710e5674415d4b55ae599c01aa4961822f53097d747472f410f157
-        # strip-components:1 por defecto → extrae el directorio platform-tools/ al raíz del módulo
+        # strip-components:1 por defecto → extrae el contenido de platform-tools/ al raíz del módulo
 
   # ─── FFmpeg 9.0.2 (bibliotecas compartidas del entorno Flatpak) ────────────
   - name: ffmpeg
