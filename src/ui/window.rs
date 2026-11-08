@@ -348,12 +348,13 @@ fn device_row(
     let controller = controller.clone();
     let list = list.clone();
     let toast_overlay = toast_overlay.clone();
-    remove.connect_clicked(
-        move |_| match controller.borrow_mut().remove_device(&device_id) {
+    remove.connect_clicked(move |_| {
+        let result = controller.borrow_mut().remove_device(&device_id);
+        match result {
             Ok(()) => populate_list(&list, &controller, &toast_overlay),
             Err(error) => toast_overlay.add_toast(adw::Toast::new(&error.to_string())),
-        },
-    );
+        }
+    });
     remove.set_valign(Align::Center);
     content.append(&remove);
     row.set_child(Some(&content));

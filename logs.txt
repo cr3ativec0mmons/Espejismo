@@ -1,0 +1,128 @@
+./espejismo --verbose                          
+[adb] adb start-server
+[adb] exit=Some(0)
+[adb] stderr: * daemon not running; starting now at tcp:5037
+* daemon started successfully
+[adb] adb devices -l
+[adb] exit=Some(0)
+[adb] stdout: List of devices attached
+[adb] adb start-server
+[adb] exit=Some(0)
+[adb] adb devices -l
+[adb] exit=Some(0)
+[adb] stdout: List of devices attached
+adb-ZY22G6BQL2-ow7wHl._adb-tls-connect._tcp device product:tundra_g model:motorola_edge_30_fusion device:tundra transport_id:1
+
+thread 'main' (78328) panicked at src/ui/window.rs:265:30:
+RefCell already mutably borrowed
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'main' (78328) panicked at library/core/src/panicking.rs:225:5:
+panic in a function that cannot unwind
+stack backtrace:
+   0:     0x56323ad04001 - std[8948f8312ce83bf2]::backtrace_rs::backtrace::libunwind::trace
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/../../backtrace/src/backtrace/libunwind.rs:117:9
+   1:     0x56323ad04001 - std[8948f8312ce83bf2]::backtrace_rs::backtrace::trace_unsynchronized::<std[8948f8312ce83bf2]::sys::backtrace::_print_fmt::{closure#1}>
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/../../backtrace/src/backtrace/mod.rs:66:14
+   2:     0x56323ad04001 - std[8948f8312ce83bf2]::sys::backtrace::_print_fmt
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/sys/backtrace.rs:74:9
+   3:     0x56323ad04001 - <<std[8948f8312ce83bf2]::sys::backtrace::BacktraceLock>::print::DisplayBacktrace as core[75dd006ffb49688f]::fmt::Display>::fmt
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/sys/backtrace.rs:44:26
+   4:     0x56323ad18cba - <core[75dd006ffb49688f]::fmt::rt::Argument>::fmt
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/core/src/fmt/rt.rs:152:76
+   5:     0x56323ad18cba - core[75dd006ffb49688f]::fmt::write
+   6:     0x56323ad087ec - core[75dd006ffb49688f]::io::write::default_write_fmt::<std[8948f8312ce83bf2]::sys::stdio::unix::Stderr>
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/core/src/io/write.rs:402:11
+   7:     0x56323ad087ec - <std[8948f8312ce83bf2]::sys::stdio::unix::Stderr as core[75dd006ffb49688f]::io::write::Write>::write_fmt
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/core/src/io/write.rs:335:13
+   8:     0x56323ace4f82 - <std[8948f8312ce83bf2]::sys::backtrace::BacktraceLock>::print
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/sys/backtrace.rs:47:9
+   9:     0x56323ace4f82 - std[8948f8312ce83bf2]::panicking::default_hook::{closure#0}
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/panicking.rs:292:27
+  10:     0x56323acfe926 - std[8948f8312ce83bf2]::panicking::default_hook
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/panicking.rs:319:9
+  11:     0x56323acfeaeb - std[8948f8312ce83bf2]::panicking::panic_with_hook
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/panicking.rs:815:13
+  12:     0x56323ace5064 - std[8948f8312ce83bf2]::panicking::panic_handler::{closure#0}
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/panicking.rs:681:13
+  13:     0x56323acddf09 - std[8948f8312ce83bf2]::sys::backtrace::__rust_end_short_backtrace::<std[8948f8312ce83bf2]::panicking::panic_handler::{closure#0}, !>
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/sys/backtrace.rs:182:18
+  14:     0x56323ace57cd - __rustc[874fb97b6799ad6d]::rust_begin_unwind
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/panicking.rs:679:5
+  15:     0x56323abb342d - core[75dd006ffb49688f]::panicking::panic_nounwind_fmt::runtime
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/core/src/panicking.rs:122:22
+  16:     0x56323abb342d - core[75dd006ffb49688f]::panicking::panic_nounwind_fmt
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/core/src/intrinsics/mod.rs:2636:9
+  17:     0x56323abb33ab - core[75dd006ffb49688f]::panicking::panic_nounwind
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/core/src/panicking.rs:225:5
+  18:     0x56323abb3537 - core[75dd006ffb49688f]::panicking::panic_cannot_unwind
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/core/src/panicking.rs:350:5
+  19:     0x56323abdd90d - gtk4[eab39f840d83d7ed]::auto::button::ButtonExt::connect_clicked::clicked_trampoline::<gtk4[eab39f840d83d7ed]::auto::button::Button, espejismo[999163b8e97fda35]::ui::window::device_row::{closure#2}>
+                               at /home/cr3ative_c0mmons/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gtk4-0.11.5/src/auto/button.rs:514:9
+  20:     0x7f9575451d66 - <unknown>
+  21:     0x7f9575451eb8 - g_signal_emit_valist
+  22:     0x7f9575451f73 - g_signal_emit
+  23:     0x7f9574a87288 - <unknown>
+  24:     0x7f9575451d66 - <unknown>
+  25:     0x7f9575451eb8 - g_signal_emit_valist
+  26:     0x7f9575451f73 - g_signal_emit
+  27:     0x7f9574b48474 - <unknown>
+  28:     0x7f9575434d93 - g_cclosure_marshal_VOID__BOXEDv
+  29:     0x7f9575451d66 - <unknown>
+  30:     0x7f9575451eb8 - g_signal_emit_valist
+  31:     0x7f9575451f73 - g_signal_emit
+  32:     0x7f9574b45aed - <unknown>
+  33:     0x7f9574b47deb - <unknown>
+  34:     0x7f9574b4a8d2 - <unknown>
+  35:     0x7f9574c83d40 - <unknown>
+  36:     0x7f9574c897ce - <unknown>
+  37:     0x7f9574b8dfb2 - <unknown>
+  38:     0x7f9574b91a3b - <unknown>
+  39:     0x7f9574ea1e48 - <unknown>
+  40:     0x7f9574f51c5a - <unknown>
+  41:     0x7f9575451d66 - <unknown>
+  42:     0x7f9575451eb8 - g_signal_emit_valist
+  43:     0x7f9575451f73 - g_signal_emit
+  44:     0x7f9574f53799 - <unknown>
+  45:     0x7f9574eaf308 - <unknown>
+  46:     0x7f95741b1564 - <unknown>
+  47:     0x7f95741b29e8 - <unknown>
+  48:     0x7f95741b2b13 - g_main_context_iteration
+  49:     0x7f9574385d7d - g_application_run
+  50:     0x56323abb4651 - <libadwaita[a872b55b02041d3d]::auto::application::Application as gio[6b24b173f25d4c0e]::application::ApplicationExtManual>::run_with_args::<alloc[6e6689803bda4b25]::string::String>
+                               at /home/cr3ative_c0mmons/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/gio-0.22.10/src/application.rs:31:13
+  51:     0x56323abb6d24 - espejismo[66a9aa00ed7338e3]::main
+                               at /home/cr3ative_c0mmons/Espejismo/src/main.rs:26:17
+  52:     0x56323abb4d6b - <fn() as core[75dd006ffb49688f]::ops::function::FnOnce<()>>::call_once
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/core/src/ops/function.rs:250:5
+  53:     0x56323abb4d9e - std[8948f8312ce83bf2]::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/sys/backtrace.rs:166:18
+  54:     0x56323abb3a71 - std[8948f8312ce83bf2]::rt::lang_start::<()>::{closure#0}
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/rt.rs:206:18
+  55:     0x56323acfdb69 - <&dyn core[75dd006ffb49688f]::ops::function::Fn<(), Output = i32> + core[75dd006ffb49688f]::panic::unwind_safe::RefUnwindSafe + core[75dd006ffb49688f]::marker::Sync as core[75dd006ffb49688f]::ops::function::FnOnce<()>>::call_once
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/core/src/ops/function.rs:287:21
+  56:     0x56323acfdb69 - std[8948f8312ce83bf2]::panicking::catch_unwind::do_call::<&dyn core[75dd006ffb49688f]::ops::function::Fn<(), Output = i32> + core[75dd006ffb49688f]::panic::unwind_safe::RefUnwindSafe + core[75dd006ffb49688f]::marker::Sync, i32>
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/panicking.rs:576:43
+  57:     0x56323acfdb69 - std[8948f8312ce83bf2]::panicking::catch_unwind::<i32, &dyn core[75dd006ffb49688f]::ops::function::Fn<(), Output = i32> + core[75dd006ffb49688f]::panic::unwind_safe::RefUnwindSafe + core[75dd006ffb49688f]::marker::Sync>
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/panicking.rs:544:19
+  58:     0x56323acfdb69 - std[8948f8312ce83bf2]::panic::catch_unwind::<&dyn core[75dd006ffb49688f]::ops::function::Fn<(), Output = i32> + core[75dd006ffb49688f]::panic::unwind_safe::RefUnwindSafe + core[75dd006ffb49688f]::marker::Sync, i32>
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/panic.rs:359:14
+  59:     0x56323acfdb69 - std[8948f8312ce83bf2]::rt::lang_start_internal::{closure#0}
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/rt.rs:175:24
+  60:     0x56323acfdb69 - std[8948f8312ce83bf2]::panicking::catch_unwind::do_call::<std[8948f8312ce83bf2]::rt::lang_start_internal::{closure#0}, isize>
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/panicking.rs:576:43
+  61:     0x56323acfdb69 - std[8948f8312ce83bf2]::panicking::catch_unwind::<isize, std[8948f8312ce83bf2]::rt::lang_start_internal::{closure#0}>
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/panicking.rs:544:19
+  62:     0x56323acfdb69 - std[8948f8312ce83bf2]::panic::catch_unwind::<std[8948f8312ce83bf2]::rt::lang_start_internal::{closure#0}, isize>
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/panic.rs:359:14
+  63:     0x56323acfdb69 - std[8948f8312ce83bf2]::rt::lang_start_internal
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/rt.rs:171:5
+  64:     0x56323abb3a57 - std[8948f8312ce83bf2]::rt::lang_start::<()>
+                               at /builddir/build/BUILD/rust-1.99.1-build/rustc-1.99.1-src/library/std/src/rt.rs:205:5
+  65:     0x56323abb6d7e - main
+  66:     0x7f9573f37301 - __libc_start_call_main
+  67:     0x7f9573f37418 - __libc_start_main_alias_1
+  68:     0x56323abb38f5 - _start
+  69:                0x0 - <unknown>
+thread caused non-unwinding panic. aborting.
+zsh: abort (core dumped)  ./espejismo --verbose
