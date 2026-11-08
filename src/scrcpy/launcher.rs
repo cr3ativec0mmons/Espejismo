@@ -10,6 +10,7 @@ use crate::model::{Decoder, DeviceId, ScrcpySettings};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ScrcpyOptions {
+    pub window_title: Option<String>,
     pub codec: Option<String>,
     pub bitrate: Option<String>,
     pub decoder: Decoder,
@@ -28,6 +29,7 @@ impl TryFrom<&ScrcpySettings> for ScrcpyOptions {
             .map(validate_bitrate)
             .transpose()?;
         Ok(Self {
+            window_title: None,
             codec,
             bitrate,
             decoder: settings.decoder,
@@ -70,11 +72,22 @@ impl ScrcpyLauncher {
     /// Construye los argumentos de scrcpy para un dispositivo y sus opciones.
     pub fn arguments(device_id: &DeviceId, options: &ScrcpyOptions) -> Vec<OsString> {
         let mut arguments = vec!["--serial".into(), device_id.as_str().into()];
+        if let Some(title) = &options.window_title {
+            arguments.extend(["--window-title".into(), title.into()]);
+        }
         if let Some(codec) = &options.codec {
             arguments.extend(["--video-codec".into(), codec.clone().into()]);
         }
         if let Some(bitrate) = &options.bitrate {
             arguments.extend(["--video-bit-rate".into(), bitrate.clone().into()]);
+        }
+        let decoder = match options.decoder {
+            Decoder::Auto => Some("auto"),
+            Decoder::Vaapi => Some("vaapi"),
+            Decoder::Software => Some("disabled"),
+        };
+        if let Some(decoder) = decoder {
+            arguments.extend(["--hwdec".into(), decoder.into()]);
         }
         if !options.control_enabled {
             arguments.push("--no-control".into());
@@ -116,7 +129,9 @@ impl ScrcpyLauncher {
 /// Valida que el codec solicitado sea compatible con las opciones admitidas.
 fn validate_codec(codec: &str) -> Result<String, ScrcpyError> {
     match codec {
-        "h264" | "h265" | "av1" => Ok(codec.to_owned()),
+        "h264" | "h265" | "hevc" | "av1" | "vp8" | "vp9" => {
+            Ok(if codec == "hevc" { "h265" } else { codec }.to_owned())
+        }
         _ => Err(ScrcpyError::InvalidCodec(codec.to_owned())),
     }
 }
@@ -142,6 +157,7 @@ mod tests {
     fn builds_serial_and_optional_arguments_without_control_override_by_default() {
         let device = DeviceId::new("usb-serial").expect("device id");
         let options = ScrcpyOptions {
+            window_title: None,
             codec: Some("h265".to_owned()),
             bitrate: Some("8M".to_owned()),
             decoder: Decoder::Auto,
@@ -156,22 +172,47 @@ mod tests {
                 "--video-codec",
                 "h265",
                 "--video-bit-rate",
-                "8M"
+                "8M",
+                "--hwdec",
+                "auto"
             ]
         );
         assert!(!arguments.iter().any(|argument| argument == "--no-control"));
     }
 
     #[test]
+    fn passes_device_name_as_one_window_title_argument() {
+        let mut options = ScrcpyOptions::try_from(&ScrcpySettings::default()).unwrap();
+        options.window_title = Some("Pixel 8 Pro".into());
+        let args = ScrcpyLauncher::arguments(&DeviceId::new("serial").unwrap(), &options);
+        assert_eq!(&args[2..4], ["--window-title", "Pixel 8 Pro"]);
+    }
+
+    #[test]
     /// Verifica que las opciones incompatibles se rechazan antes del lanzamiento.
     fn validates_options_before_launch() {
         let settings = ScrcpySettings {
-            codec: Some("vp9".to_owned()),
+            codec: Some("vp10".to_owned()),
             ..ScrcpySettings::default()
         };
         assert!(matches!(
             ScrcpyOptions::try_from(&settings),
-            Err(ScrcpyError::InvalidCodec(codec)) if codec == "vp9"
+            Err(ScrcpyError::InvalidCodec(codec)) if codec == "vp10"
         ));
+    }
+
+    #[test]
+    fn maps_hevc_to_scrcpy_h265() {
+        let settings = ScrcpySettings {
+            codec: Some("hevc".to_owned()),
+            decoder: Decoder::Vaapi,
+            ..ScrcpySettings::default()
+        };
+        let options = ScrcpyOptions::try_from(&settings).expect("valid settings");
+        assert_eq!(options.codec.as_deref(), Some("h265"));
+        assert_eq!(
+            ScrcpyLauncher::arguments(&DeviceId::new("serial").unwrap(), &options)[4..6],
+            ["--hwdec", "vaapi"]
+        );
     }
 }

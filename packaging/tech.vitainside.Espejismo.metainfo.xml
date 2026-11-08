@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>tech.vitainside.Espejismo</id>
+
+  <name>Espejismo</name>
+  <name xml:lang="en">Espejismo</name>
+
+  <summary>Interfaz de escritorio para ADB y scrcpy</summary>
+  <summary xml:lang="en">Desktop interface for ADB and scrcpy</summary>
+
+  <description>
+    <p>
+      Espejismo es una interfaz gráfica experimental para controlar dispositivos
+      Android mediante ADB y scrcpy. Escrita en Rust con GTK4 y libadwaita.
+      Incluye ADB (platform-tools) y scrcpy (cliente + servidor) en el paquete.
+      Lista dispositivos ADB por USB o Wi-Fi, ofrece diagnóstico de conexión,
+      emparejamiento Wi-Fi paso a paso y lanzamiento integrado de scrcpy.
+    </p>
+    <p xml:lang="en">
+      Espejismo is an experimental graphical interface for controlling Android
+      devices via ADB and scrcpy. Written in Rust with GTK4 and libadwaita.
+      ADB (platform-tools) and scrcpy (client and server) are bundled.
+      It lists USB and Wi-Fi ADB devices, diagnoses connection states, guides
+      Wi-Fi pairing, and launches scrcpy for each device.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">tech.vitainside.Espejismo.desktop</launchable>
+
+  <url type="homepage">https://vitainside.tech</url>
+
+  <metadata_license>FSFAP</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <developer id="tech.vitainside">
+    <name>Espejismo Contributors</name>
+  </developer>
+
+  <categories>
+    <category>Utility</category>
+  </categories>
+
+  <keywords>
+    <keyword>Android</keyword>
+    <keyword>ADB</keyword>
+    <keyword>scrcpy</keyword>
+    <keyword>mirror</keyword>
+    <keyword>espejo</keyword>
+    <keyword>dispositivo</keyword>
+  </keywords>
+
+  <content_rating type="oars-1.1"/>
+
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </supports>
+
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+
+  <releases>
+    <release version="0.1.0" date="2024-01-01" type="development">
+      <description>
+        <p>Versión inicial experimental con soporte básico de ADB y scrcpy.</p>
+        <p xml:lang="en">Initial experimental release with basic ADB and scrcpy support.</p>
+      </description>
+    </release>
+  </releases>
+</component>

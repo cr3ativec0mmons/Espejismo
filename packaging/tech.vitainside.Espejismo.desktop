@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=Espejismo
+Name[es]=Espejismo
+Comment=Interfaz de escritorio para ADB y scrcpy
+Comment[es]=Interfaz de escritorio para ADB y scrcpy
+Comment[en]=Desktop interface for ADB and scrcpy
+Exec=espejismo
+Icon=tech.vitainside.Espejismo
+Terminal=false
+Type=Application
+Categories=Utility;
+Keywords=ADB;Android;scrcpy;mirror;espejo;dispositivo;device;
+StartupWMClass=espejismo

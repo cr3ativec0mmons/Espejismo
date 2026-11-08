@@ -1,0 +1,52 @@
+name: Flatpak Build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  flatpak:
+    name: Build Flatpak bundle
+    runs-on: ubuntu-24.04
+    # Container con GNOME SDK 51 preinstalado; --privileged requerido por flatpak/FUSE.
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-51
+      options: --privileged
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cargo-sources generator dependencies
+        run: pip3 install aiohttp toml
+
+      # Generador fijado a commit específico para reproducibilidad.
+      - name: Fetch flatpak-cargo-generator.py
+        run: |
+          curl -sL \
+            "https://raw.githubusercontent.com/flatpak/flatpak-builder-tools/41c20aa10819cdb2a4f3ca171758a96d1955c018/cargo/flatpak-cargo-generator.py" \
+            -o flatpak-cargo-generator.py
+
+      # Siempre regenerado desde el Cargo.lock actual; añadir nuevos crates (QR, etc.)
+      # solo requiere actualizar Cargo.lock — el generador se encarga del resto.
+      - name: Generate packaging/cargo-sources.json from Cargo.lock
+        run: python3 flatpak-cargo-generator.py Cargo.lock -o packaging/cargo-sources.json
+
+      - name: Build Flatpak bundle
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: espejismo.flatpak
+          manifest-path: packaging/tech.vitainside.Espejismo.yml
+          cache-key: flatpak-${{ hashFiles('packaging/tech.vitainside.Espejismo.yml', 'Cargo.lock') }}
+
+      - name: Upload Flatpak bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: espejismo-flatpak-${{ github.sha }}
+          path: espejismo.flatpak
+          if-no-files-found: error
+          retention-days: 30

@@ -7,4 +7,4 @@ pub mod scrcpy;
 #[cfg(feature = "gui")]
 pub mod ui;
 
-pub const APPLICATION_ID: &str = "com.espejismo.Espejismo";
+pub const APPLICATION_ID: &str = "tech.vitainside.Espejismo";

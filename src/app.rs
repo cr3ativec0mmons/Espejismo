@@ -62,6 +62,24 @@ where
         &self.settings
     }
 
+    /// Detiene el servidor ADB cuando la aplicación termina.
+    pub fn shutdown(&self) -> Result<(), AppError> {
+        self.adb.kill_server()?;
+        Ok(())
+    }
+
+    /// Actualiza y persiste las opciones globales de scrcpy.
+    pub fn update_scrcpy_settings(
+        &mut self,
+        codec: Option<String>,
+        decoder: crate::model::Decoder,
+    ) -> Result<(), AppError> {
+        self.settings.scrcpy.codec = codec;
+        self.settings.scrcpy.decoder = decoder;
+        self.repository.save(&self.settings)?;
+        Ok(())
+    }
+
     /// Olvida un dispositivo guardado y elimina sus ajustes específicos.
     pub fn remove_device(&mut self, device_id: &DeviceId) -> Result<(), AppError> {
         self.settings
@@ -130,7 +148,8 @@ where
             .device_overrides
             .get(&device.id)
             .unwrap_or(&self.settings.scrcpy);
-        let options = ScrcpyOptions::try_from(settings)?;
+        let mut options = ScrcpyOptions::try_from(settings)?;
+        options.window_title = Some(device.display_name());
         self.state = AppState::LaunchingScrcpy;
         let child = self.scrcpy.launch(&device.id, &options)?;
         self.state = AppState::Streaming;

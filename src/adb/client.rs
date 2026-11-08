@@ -24,7 +24,11 @@ impl Endpoint {
 
     /// Convierte el endpoint al formato `host:puerto` usado por ADB.
     fn as_argument(&self) -> OsString {
-        format!("{}:{}", self.host, self.port).into()
+        if self.host.contains(':') && !self.host.starts_with('[') {
+            format!("[{}]:{}", self.host, self.port).into()
+        } else {
+            format!("{}:{}", self.host, self.port).into()
+        }
     }
 }
 
@@ -71,6 +75,11 @@ where
     /// Inicia el servidor ADB y devuelve un error si el comando falla.
     pub fn start_server(&self) -> Result<(), AdbClientError> {
         self.run_success("start-server", &["start-server"])
+    }
+
+    /// Detiene el servidor ADB al cerrar la aplicación.
+    pub fn kill_server(&self) -> Result<(), AdbClientError> {
+        self.run_success("kill-server", &["kill-server"])
     }
 
     /// Obtiene y analiza la lista detallada de dispositivos conectados.
@@ -223,5 +232,11 @@ mod tests {
             Endpoint::new("host", 0),
             Err(AdbClientError::InvalidEndpoint)
         ));
+    }
+
+    #[test]
+    fn formats_ipv6_endpoints_without_ambiguity() {
+        let endpoint = Endpoint::new("fe80::1", 5555).expect("endpoint");
+        assert_eq!(endpoint.to_string(), "[fe80::1]:5555");
     }
 }

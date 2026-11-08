@@ -1,0 +1,103 @@
+id: tech.vitainside.Espejismo
+runtime: org.gnome.Platform
+runtime-version: '51'
+sdk: org.gnome.Sdk
+# GNOME 51 → Freedesktop SDK 25.08 → rust-stable//25.08 (Rust ≥ 1.85, edition 2024)
+# GTK 4.20+, libadwaita 1.9+ — satisface gtk4-sys 0.11.5 (≥ 4.16) y adw-sys 0.9.2 (≥ 1.6)
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.rust-stable
+command: espejismo
+
+finish-args:
+  - --env=SCRCPY_SERVER_PATH=/app/share/scrcpy/scrcpy-server
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --share=network
+  - --talk-name=org.kde.StatusNotifierWatcher
+  - --talk-name=org.ayatana.indicator.application
+  - --device=all
+  - --filesystem=xdg-videos:rw
+
+modules:
+  # ─── ADB r37.0.2 (platform-tools oficial Google) ───────────────────────────
+  - name: adb
+    only-arches:
+      - x86_64
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 platform-tools/adb /app/bin/adb
+      - install -Dm755 platform-tools/fastboot /app/bin/fastboot
+    sources:
+      - type: archive
+        url: https://dl.google.com/android/repository/platform-tools_r37.0.2-linux.zip
+        sha256: dfc80a84a6710e5674415d4b55ae599c01aa4961822f53097d747472f410f157
+        # strip-components:1 por defecto → extrae el directorio platform-tools/ al raíz del módulo
+
+  # ─── FFmpeg 9.0.2 (bibliotecas compartidas del entorno Flatpak) ────────────
+  - name: ffmpeg
+    buildsystem: autotools
+    config-opts:
+      - --disable-programs
+      - --disable-doc
+      - --disable-debug
+      - --disable-network
+      - --disable-autodetect
+      - --disable-x86asm
+      - --enable-shared
+      - --disable-static
+    sources:
+      - type: archive
+        url: https://ffmpeg.org/releases/ffmpeg-9.0.2.tar.xz
+        sha256: 8c3850283eb25fa026482078a04051e0be17347b09ef81a0849bec15a96e002e
+
+  # ─── scrcpy 5.0.1 (binario Linux estático + servidor JAR) ─────────────────
+  # Verificado con ldd: solo libm, libudev, libc, libgcc_s — todas en GNOME Platform.
+  # SDL3, FFmpeg 9.0.2, libusb enlazados estáticamente. glibc_max=2.35 ≤ FD SDK 25.08.
+  # El tar incluye adb (r37.0.2) que NO se instala aquí (ya lo provee el módulo adb).
+  # strip-components:1 (default) → archivos en raíz del build dir sin prefijo de directorio.
+  - name: scrcpy
+    only-arches:
+      - x86_64
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 scrcpy /app/bin/scrcpy
+      - install -Dm644 scrcpy-server /app/share/scrcpy/scrcpy-server
+      - install -Dm644 scrcpy.1 /app/share/man/man1/scrcpy.1
+    sources:
+      - type: archive
+        url: https://github.com/Genymobile/scrcpy/releases/download/v5.0.1/scrcpy-linux-x86_64-v5.0.1.tar.gz
+        sha256: 9f969d30cc574816077edecda65719c1c70b0aee1df1ba5fa00779ac07b8fd6e
+
+  # ─── Espejismo (Rust 2024 / GTK4 + libadwaita) ────────────────────────────
+  # cargo-sources.json se genera en CI desde Cargo.lock antes del build.
+  # Local: python3 flatpak-cargo-generator.py Cargo.lock -o packaging/cargo-sources.json
+  - name: espejismo
+    buildsystem: simple
+    build-options:
+      append-path: /usr/lib/sdk/rust-stable/bin
+      env:
+        CARGO_HOME: /run/build/espejismo/cargo
+        RUST_BACKTRACE: '1'
+    build-commands:
+      - mkdir -p .cargo
+      - |
+        cat > .cargo/config.toml << 'CARGO_CFG'
+        [source.crates-io]
+        replace-with = "vendored-sources"
+
+        [source.vendored-sources]
+        directory = "cargo/vendor"
+        CARGO_CFG
+      - cargo --offline build --release --features gui
+      - install -Dm755 target/release/espejismo /app/bin/espejismo
+        - install -Dm644 packaging/tech.vitainside.Espejismo.desktop
+          /app/share/applications/tech.vitainside.Espejismo.desktop
+        - install -Dm644 packaging/tech.vitainside.Espejismo.metainfo.xml
+          /app/share/metainfo/tech.vitainside.Espejismo.metainfo.xml
+        - install -Dm644 packaging/icons/tech.vitainside.Espejismo.svg
+          /app/share/icons/hicolor/scalable/apps/tech.vitainside.Espejismo.svg
+    sources:
+      - type: dir
+        path: ..
+      - cargo-sources.json

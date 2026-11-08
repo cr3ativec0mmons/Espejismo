@@ -51,6 +51,14 @@ pub struct Device {
 }
 
 impl Device {
+    pub fn display_name(&self) -> String {
+        self.model
+            .as_deref()
+            .or(self.alias.as_deref())
+            .unwrap_or(self.id.as_str())
+            .replace('_', " ")
+    }
+
     /// Indica si ADB considera que el dispositivo está listo para usarse.
     pub fn is_usable(&self) -> bool {
         self.status == DeviceStatus::Device

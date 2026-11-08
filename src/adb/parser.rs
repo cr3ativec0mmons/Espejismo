@@ -55,7 +55,10 @@ fn parse_device_line(line: &str) -> Result<AdbDevice, AdbParseError> {
     Ok(Device {
         id,
         alias: None,
-        transport: if serial.contains(':') {
+        transport: if serial.contains(':')
+            || serial.ends_with("._adb-tls-connect._tcp")
+            || serial.ends_with("._adb-tls-connect._tcp.")
+        {
             Transport::Wifi
         } else {
             Transport::Usb
@@ -81,6 +84,22 @@ mod tests {
         assert_eq!(devices[0].transport, Transport::Usb);
         assert_eq!(devices[0].model.as_deref(), Some("Pixel_8"));
         assert_eq!(devices[1].transport, Transport::Wifi);
+    }
+
+    #[test]
+    fn recognizes_wireless_mdns_ipv6_and_usb_transports() {
+        let devices = parse_devices(
+            "adb-ABC-xyz._adb-tls-connect._tcp device model:Pixel\nadb-DEF-xyz._adb-tls-connect._tcp. offline\n[fe80::1]:5555 device\nUSB123 device usb:1-2 transport_id:4\n",
+        ).unwrap();
+        assert_eq!(
+            devices.iter().map(|d| d.transport).collect::<Vec<_>>(),
+            [
+                Transport::Wifi,
+                Transport::Wifi,
+                Transport::Wifi,
+                Transport::Usb
+            ]
+        );
     }
 
     #[test]
