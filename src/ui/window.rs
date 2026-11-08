@@ -41,13 +41,13 @@ pub fn present(application: &adw::Application, verbose: bool) {
             tracing::warn!(%error, "could not stop ADB server during shutdown");
         }
     });
-    let content = build_content(&window, controller);
+    let content = build_content(&window, controller, verbose);
     window.set_content(Some(&content));
     window.present();
 }
 
 /// Construye la barra de herramientas y la vista principal de dispositivos.
-fn build_content(window: &adw::ApplicationWindow, controller: Controller) -> Box {
+fn build_content(window: &adw::ApplicationWindow, controller: Controller, verbose: bool) -> Box {
     let content = Box::new(Orientation::Vertical, 0);
     let header = adw::HeaderBar::new();
 
@@ -125,6 +125,7 @@ fn build_content(window: &adw::ApplicationWindow, controller: Controller) -> Box
                 }
             },
             move || populate_list(&list_for_qr, &controller_for_qr, &toast_overlay_for_qr),
+            verbose,
         );
     });
 

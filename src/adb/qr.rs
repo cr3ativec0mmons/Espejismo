@@ -123,10 +123,11 @@ pub struct MdnsService {
 
 /// Parse the output of `adb mdns services`.
 ///
-/// Handles two common ADB output formats:
+/// Handles common ADB output formats:
 ///
 /// - **Four columns**: `<instance> <type> <host> <port>`
-/// - **Three columns** (full instance name): `<instance>.<type> <host> <port>`
+/// - **Three columns**: `<instance> <type> <host>:<port>`
+/// - **Two columns** (full instance name): `<instance>.<type> <host>:<port>`
 ///
 /// Lines that do not contain a recognisable ADB TLS service type are silently
 /// skipped, as are the header line and blank lines.
@@ -156,19 +157,51 @@ fn parse_mdns_line(line: &str) -> Option<MdnsService> {
                 port,
             })
         }
-        // Three-column format: instance._type  host  port
+        // Three-column format: instance  type  host:port
+        [instance, svc_type, host_port] if is_adb_tls(svc_type) => {
+            let (host, port) = split_host_port(host_port)?;
+            Some(MdnsService {
+                instance: (*instance).to_owned(),
+                service_type: svc_type.trim_end_matches('.').to_owned(),
+                host,
+                port,
+            })
+        }
+        // Three-column legacy format: instance._type  host  port
         [full_name, host, port] => {
             let (instance, svc_type) = split_full_name(full_name)?;
-            let port = port.trim().parse().ok()?;
             Some(MdnsService {
                 instance,
                 service_type: svc_type,
                 host: (*host).to_owned(),
+                port: port.parse().ok()?,
+            })
+        }
+        // Two-column format: instance._type  host:port
+        [full_name, host_port] => {
+            let (instance, svc_type) = split_full_name(full_name)?;
+            let (host, port) = split_host_port(host_port)?;
+            Some(MdnsService {
+                instance,
+                service_type: svc_type,
+                host,
                 port,
             })
         }
         _ => None,
     }
+}
+
+fn split_host_port(value: &str) -> Option<(String, u16)> {
+    if let Some(value) = value.strip_prefix('[') {
+        let (host, port) = value.split_once("]:")?;
+        return Some((host.to_owned(), port.parse().ok()?));
+    }
+    let (host, port) = value.rsplit_once(':')?;
+    if host.is_empty() {
+        return None;
+    }
+    Some((host.to_owned(), port.parse().ok()?))
 }
 
 fn is_adb_tls(s: &str) -> bool {
@@ -204,9 +237,10 @@ pub fn start_pairing_worker(
     session: QrSession,
     cancel: Arc<AtomicBool>,
     tx: std::sync::mpsc::Sender<WorkerEvent>,
+    verbose: bool,
 ) -> std::thread::JoinHandle<()> {
     std::thread::spawn(move || {
-        let runner = CommandAdbRunner::from_path_environment();
+        let runner = CommandAdbRunner::from_path_environment().with_verbose(verbose);
         run_worker(
             &runner,
             &session.service_name,
@@ -461,6 +495,15 @@ mod tests {
         let output = "List of discovered mdns services\nadb-deadbeef _adb-tls-pairing._tcp 192.168.1.5 46159\n";
         let services = parse_mdns_services(output);
         assert_eq!(services[0].port, 46159);
+    }
+
+    #[test]
+    fn parses_current_adb_host_port_records() {
+        let output = "List of discovered mdns services\nadb-ZY22G6BQL2-ow7wHl   _adb-tls-connect._tcp   10.0.0.31:39509\n";
+        let services = parse_mdns_services(output);
+        assert_eq!(services.len(), 1);
+        assert_eq!(services[0].host, "10.0.0.31");
+        assert_eq!(services[0].port, 39509);
     }
 
     #[test]

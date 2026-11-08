@@ -64,6 +64,7 @@ pub fn present(
     parent: &impl IsA<gtk4::Widget>,
     on_connect: impl Fn(PairingDetails) + 'static,
     on_paired: impl Fn() + 'static,
+    verbose: bool,
 ) {
     // ── QR session (generated once per dialog) ────────────────────────────────
     let (qr_width, qr_colors, session) = match build_qr_data() {
@@ -125,6 +126,7 @@ pub fn present(
         status_label,
         dialog.clone(),
         on_paired,
+        verbose,
     );
     timer_active.set(true);
 
@@ -182,10 +184,11 @@ fn start_qr_worker(
     status_label: Label,
     dialog: adw::Dialog,
     on_paired: impl Fn() + 'static,
+    verbose: bool,
 ) {
     let (tx, rx) = mpsc::channel::<WorkerEvent>();
 
-    start_pairing_worker(session, cancel, tx);
+    start_pairing_worker(session, cancel, tx, verbose);
 
     let on_paired = Rc::new(on_paired);
     let timer_active2 = Rc::clone(&timer_active);
